@@ -9,7 +9,36 @@ function generateTaskId() {
 
 // Todo: create a function to create a task card
 function createTaskCard(task) {
+    //tasks cards will be created in div with id of 'todo-cards'
+    //task cards have a header with the title, a content area with the description
+    //the date and a delete button
+    //the task card color scheme is dependent on the status
 
+    //create every element of the card with classes found on bootstrap
+    const cardArea = $('#todo-cards');
+    const newCardEl = $('<div>').addClass('card col-8 m-2');
+    const newCardHeaderEl = $('<h5>').addClass('card-header');
+    const newCardContentEl = $('<div>').addClass('card-body');
+    const newCardDescriptionEl = $('<p>').addClass('card-text');
+    const newCardDueDateEl = $('<h6>').addClass('card-title');
+    const newCardDeleteButton = $('<button>').attr('type', 'button').addClass('btn btn-danger').text('delete');
+
+    //add content to each element based on the task
+    newCardHeaderEl.text(task.title);
+    newCardDescriptionEl.text(task.description);
+    newCardDueDateEl.text(task.dueDate);
+
+    //color based on status
+    if(task.status === 'overdue') {
+        newCardEl.addClass('bg-danger text-white');
+        newCardDeleteButton.addClass('border border-light');
+    } else if(task.status === 'dueSoon') {
+        newCardEl.addClass('bg-warning text-white');
+    }
+    //append content to there appropriate sections of the card
+    newCardContentEl.append(newCardDescriptionEl, newCardDueDateEl, newCardDeleteButton);
+    newCardEl.append(newCardHeaderEl, newCardContentEl);
+    cardArea.append(newCardEl);
 }
 
 // Todo: create a function to render the task list and make cards draggable
@@ -46,6 +75,8 @@ function handleAddTask(event){
         status: taskStatus,
         state: 'todo'
     };
+    //create the card here for now to visualize changes
+    createTaskCard(newTask);
     
     if(!taskList) {
         taskList = [];
