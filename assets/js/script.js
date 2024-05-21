@@ -41,8 +41,7 @@ function createTaskCard(task) {
     //the task card color scheme is dependent on the status
 
     //create every element of the card with classes found on bootstrap
-    const cardArea = $('#todo-cards');
-    const newCardEl = $('<div>').addClass('card col-8 m-2');
+    const cardArea = $('<li>').addClass('m-2');
     const newCardHeaderEl = $('<h5>').addClass('card-header');
     const newCardContentEl = $('<div>').addClass('card-body');
     const newCardDescriptionEl = $('<p>').addClass('card-text');
@@ -56,27 +55,49 @@ function createTaskCard(task) {
 
     //color based on status
     if(task.status === 'overdue') {
-        newCardEl.addClass('bg-danger text-white');
+        cardArea.addClass('bg-danger text-white');
         newCardDeleteButton.addClass('border border-light');
     } else if(task.status === 'dueSoon') {
-        newCardEl.addClass('bg-warning text-white');
+        cardArea.addClass('bg-warning text-white');
     }
     //append content to there appropriate sections of the card
     newCardContentEl.append(newCardDescriptionEl, newCardDueDateEl, newCardDeleteButton);
-    newCardEl.append(newCardHeaderEl, newCardContentEl);
-    cardArea.append(newCardEl);
+    cardArea.append(newCardHeaderEl, newCardContentEl);
 
     //add draggable feature
-    newCardEl.draggable({
+    cardArea.draggable({
         opacity: '35%',
         helper: 'clone',
         revert: 'invalid'
     });
+
+    return cardArea;
 }
 
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
+    // take the task list and use the createTaskCard in here to render based on state
+    const todoAreaEl = $('#todo-cards').html('');
+    const todoListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const inProgressAreaEl = $('#in-progress-cards').html('');
+    const inProgressListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const doneAreaEl = $('#done-cards').html('');
+    const doneListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
 
+    for (let task in taskList) {
+        if (taskList[task].state === 'todo') {
+            todoListEl.append(createTaskCard(taskList[task]));
+        } else if (taskList[task].state === 'inProgress') {
+            inProgressListEl.append(createTaskCard(taskList[task]));
+        } else if (taskList[task].state === 'done') {
+            doneListEl.append(createTaskCard(taskList[task]));
+        }
+    }
+
+    todoAreaEl.append(todoListEl);
+    inProgressAreaEl.append(inProgressAreaEl);
+    doneAreaEl.append(doneAreaEl);
+    
 }
 // Todo: create a function to handle adding a new task
 function handleAddTask(event){
@@ -113,7 +134,7 @@ function handleAddTask(event){
     var newTaskId = generateTaskId(newTask);
     newTask.Id = newTaskId;
     //create the card here for now to visualize changes
-    createTaskCard(newTask);
+    // createTaskCard(newTask);
     
     if(!taskList) {
         taskList = [];
@@ -128,6 +149,7 @@ function handleAddTask(event){
     taskDueDate.val('');
     taskTitle.val('');
     
+    renderTaskList();
 }
 
 // Todo: create a function to handle deleting a task
@@ -142,8 +164,8 @@ function handleDrop(event, ui) {
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
+    renderTaskList();
     const addTask = $('#formModal');
-
     addTask.on('submit', handleAddTask);
 });
 
