@@ -142,15 +142,20 @@ function handleAddTask(event){
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask(event){
-    var x = 0;       
-    for (var task of taskList) {
-        if (task.Id == event.target.id){
-            taskList.splice(x, 1);
-            localStorage.setItem('tasks', JSON.stringify(taskList));
-            window.location.reload();
+    var confirmation = confirm('Are you sure you want to delete this task? This action is permanent. If you wish to delete, press ok, if you wish to keep the task press cancel');
+
+    if(confirmation) {
+        var x = 0;       
+        for (var task of taskList) {
+            if (task.Id == event.target.id){
+                taskList.splice(x, 1);
+                localStorage.setItem('tasks', JSON.stringify(taskList));
+                window.location.reload();
+            }
+            x++;
         }
-        x++;
     }
+   
 }
 
 // Todo: create a function to handle dropping a task into a new status lane
@@ -179,7 +184,7 @@ $(document).ready(function () {
     renderTaskList();
 
     addTask.on('submit', handleAddTask);
-    $('button').click(handleDeleteTask);
+    $('.btn-danger').click(handleDeleteTask);
 
     $( function() {
         $( "#datepicker" ).datepicker();
