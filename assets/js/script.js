@@ -2,6 +2,9 @@
 let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 
+//easeOfUseFeature
+const modalWarningMessage = $('<p>').text('Please make sure to fill out all three input boxes!!').addClass('text-danger fw-bold');
+const modalForm = $('form');
 // Todo: create a function to generate a unique task id
 function generateTaskId(task) {
     if(!nextId) {
@@ -113,6 +116,18 @@ function handleAddTask(event){
     newTask.Id = newTaskId;
     //create the card here for now to visualize changes
     // createTaskCard(newTask);
+
+    //making sure that all elements of the tasks are filled out
+    
+    for (attributes in newTask) {
+        if(!newTask[attributes]) {
+            modalForm.append(modalWarningMessage);
+            event.preventDefault();
+            return;
+        }
+    }
+
+    $('#submitTask').attr('data-bs-dismiss', 'modal');
     
     if(!taskList) {
         taskList = [];
@@ -127,16 +142,20 @@ function handleAddTask(event){
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask(event){
-    console.log(event)
-    var x = 0;       
-    for (var task of taskList) {
-        if (task.Id == event.target.id){
-            taskList.splice(x, 1);
-            localStorage.setItem('tasks', JSON.stringify(taskList));
-            window.location.reload();
+    var confirmation = confirm('Are you sure you want to delete this task? This action is permanent. If you wish to delete, press ok, if you wish to keep the task press cancel');
+
+    if(confirmation) {
+        var x = 0;       
+        for (var task of taskList) {
+            if (task.Id == event.target.id){
+                taskList.splice(x, 1);
+                localStorage.setItem('tasks', JSON.stringify(taskList));
+                window.location.reload();
+            }
+            x++;
         }
-        x++;
     }
+   
 }
 
 // Todo: create a function to handle dropping a task into a new status lane
@@ -163,8 +182,10 @@ const addTask = $('#formModal');
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
     renderTaskList();
+
     addTask.on('submit', handleAddTask);
-    $('button').click(handleDeleteTask);
+    $('.btn-danger').click(handleDeleteTask);
+
     $( function() {
         $( "#datepicker" ).datepicker();
         $( "#sortable1, #sortable2, #sortable3" ).sortable({
