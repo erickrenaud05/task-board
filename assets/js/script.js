@@ -26,7 +26,8 @@ function createTaskCard(task) {
     const newCardDescriptionEl = $('<p>').addClass('card-text');
     const newCardDueDateEl = $('<h6>').addClass('card-title');
     const newCardDeleteButton = $('<button>').attr('type', 'button').addClass('btn btn-danger').text('delete');
-
+    // adding id to button for event purposes
+    newCardDeleteButton.attr('id', task.Id);
     //add content to each element based on the task
     newCardHeaderEl.text(task.title);
     newCardDescriptionEl.text(task.description);
@@ -126,7 +127,16 @@ function handleAddTask(event){
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask(event){
-
+    console.log(event)
+    var x = 0;       
+    for (var task of taskList) {
+        if (task.Id == event.target.id){
+            taskList.splice(x, 1);
+            localStorage.setItem('tasks', JSON.stringify(taskList));
+            window.location.reload();
+        }
+        x++;
+    }
 }
 
 // Todo: create a function to handle dropping a task into a new status lane
@@ -149,22 +159,24 @@ function handleDrop(event, ui) {
     localStorage.setItem('tasks', JSON.stringify(taskList));
 }
 
+const addTask = $('#formModal');
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function () {
     renderTaskList();
-    const addTask = $('#formModal');
     addTask.on('submit', handleAddTask);
+    $('button').click(handleDeleteTask);
+    $( function() {
+        $( "#datepicker" ).datepicker();
+        $( "#sortable1, #sortable2, #sortable3" ).sortable({
+            connectWith: ".connectedSortable",
+            dropOnEmpty: true,
+          })
+        $('#sortable1, #sortable2, #sortable3').droppable({
+            drop: handleDrop
+        })
+      } );
 });
 
 
 
-$( function() {
-    $( "#datepicker" ).datepicker();
-    $( "#sortable1, #sortable2, #sortable3" ).sortable({
-        connectWith: ".connectedSortable",
-        dropOnEmpty: true,
-      })
-    $('#sortable1, #sortable2, #sortable3').droppable({
-        drop: handleDrop
-    })
-  } );
+
