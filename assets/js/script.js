@@ -23,7 +23,7 @@ function createTaskCard(task) {
     //the task card color scheme is dependent on the status
 
     //create every element of the card with classes found on bootstrap
-    const cardArea = $('<li>').addClass('m-2').attr('id', task.Id);
+    const cardArea = $('<li>').addClass('m-2').attr('id', task.Id).attr('style', 'background: white');
     const newCardHeaderEl = $('<h5>').addClass('card-header');
     const newCardContentEl = $('<div>').addClass('card-body');
     const newCardDescriptionEl = $('<p>').addClass('card-text');
