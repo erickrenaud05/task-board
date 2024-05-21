@@ -4,33 +4,12 @@ let nextId = JSON.parse(localStorage.getItem("nextId"));
 
 // Todo: create a function to generate a unique task id
 function generateTaskId(task) {
-    // id will be based on status and position
-    // three unique ids for each section, then the order of the items 
     if(!nextId) {
-        nextId = {
-            toDo: 0,
-            inProgress: 0,
-            done: 0
-        }
+        nextId = []
     }
-    
-    if (task.state === 'todo') {
-        nextId.toDo++;
-        localStorage.setItem('nextId', JSON.stringify(nextId));
-        return nextId.toDo;
-    } else if (task.state === 'inProgress') {
-        nextId.inProgress++;
-        localStorage.setItem('nextId', JSON.stringify(nextId));
-        return nextId.inProgress;
-    } else if (task.state === 'done') {
-        nextId.done++;
-        localStorage.setItem('nextId', JSON.stringify(nextId));
-        return nextId.done;
-    }
-
-    //if the code gets to this point there is an unknown error
-    console.log('unknown error');
-    return 1
+    nextId++;
+    localStorage.setItem('nextId', JSON.stringify(nextId));
+    return nextId;
 }
 
 // Todo: create a function to create a task card
@@ -41,7 +20,7 @@ function createTaskCard(task) {
     //the task card color scheme is dependent on the status
 
     //create every element of the card with classes found on bootstrap
-    const cardArea = $('<li>').addClass('m-2');
+    const cardArea = $('<li>').addClass('m-2').attr('id', task.Id);
     const newCardHeaderEl = $('<h5>').addClass('card-header');
     const newCardContentEl = $('<div>').addClass('card-body');
     const newCardDescriptionEl = $('<p>').addClass('card-text');
@@ -64,13 +43,6 @@ function createTaskCard(task) {
     newCardContentEl.append(newCardDescriptionEl, newCardDueDateEl, newCardDeleteButton);
     cardArea.append(newCardHeaderEl, newCardContentEl);
 
-    //add draggable feature
-    cardArea.draggable({
-        opacity: '35%',
-        helper: 'clone',
-        revert: 'invalid'
-    });
-
     return cardArea;
 }
 
@@ -78,13 +50,20 @@ function createTaskCard(task) {
 function renderTaskList() {
     // take the task list and use the createTaskCard in here to render based on state
     const todoAreaEl = $('#todo-cards').html('');
-    const todoListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const todoListEl = $('<ul>').css('list-style-type', 'none')
+        .addClass('connectedSortable card col-8 p-0 border-0 bg-light').attr('id', 'sortable1');
     const inProgressAreaEl = $('#in-progress-cards').html('');
-    const inProgressListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const inProgressListEl = $('<ul>').css('list-style-type', 'none').attr('id', 'sortable2')
+        .addClass('connectedSortable card col-8 p-0 border-0 bg-light ');
     const doneAreaEl = $('#done-cards').html('');
-    const doneListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const doneListEl = $('<ul>').css('list-style-type', 'none').attr('id', 'sortable3')
+        .addClass('connectedSortable card col-8 p-0 border-0 bg-light');
 
-    for (let task in taskList) {
+    todoAreaEl.addClass('h-100');
+    inProgressAreaEl.addClass('h-100');
+    doneAreaEl.addClass('h-100');
+        
+        for (let task in taskList) {
         if (taskList[task].state === 'todo') {
             todoListEl.append(createTaskCard(taskList[task]));
         } else if (taskList[task].state === 'inProgress') {
@@ -95,13 +74,12 @@ function renderTaskList() {
     }
 
     todoAreaEl.append(todoListEl);
-    inProgressAreaEl.append(inProgressAreaEl);
-    doneAreaEl.append(doneAreaEl);
+    inProgressAreaEl.append(inProgressListEl);
+    doneAreaEl.append(doneListEl);
     
 }
 // Todo: create a function to handle adding a new task
 function handleAddTask(event){
-    event.preventDefault();
     // pseudo code:
     //1: store form input variables
     var taskTitle = $('input[name="taskTitle"]');
@@ -128,7 +106,6 @@ function handleAddTask(event){
         description: taskDescription.val(),
         status: taskStatus,
         state: 'todo',
-        //added during task id branch
     };
 
     var newTaskId = generateTaskId(newTask);
@@ -143,11 +120,6 @@ function handleAddTask(event){
  
     //3: store object to localStorage in array of forms
     localStorage.setItem('tasks', JSON.stringify(taskList));
-
-    //reset form and make modal leave
-    taskDescription.val('');
-    taskDueDate.val('');
-    taskTitle.val('');
     
     renderTaskList();
 }
@@ -159,7 +131,22 @@ function handleDeleteTask(event){
 
 // Todo: create a function to handle dropping a task into a new status lane
 function handleDrop(event, ui) {
+    // ui.draggable[0].dataset.projectId
 
+    for (var task of taskList) {
+        // console.log(ui) is where task id is ui[0].id
+        // console.log(event) is where the drop id is event.target.id
+        if(task.Id == ui.draggable[0].id) {
+            if(event.target.id === 'sortable1') {
+                task.state = 'todo';
+            } else if(event.target.id === 'sortable2') {
+                task.state = 'inProgress';
+            } else if(event.target.id === 'sortable3') {
+                task.state = 'done';
+            }
+        }
+    }
+    localStorage.setItem('tasks', JSON.stringify(taskList));
 }
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
@@ -173,4 +160,11 @@ $(document).ready(function () {
 
 $( function() {
     $( "#datepicker" ).datepicker();
+    $( "#sortable1, #sortable2, #sortable3" ).sortable({
+        connectWith: ".connectedSortable",
+        dropOnEmpty: true,
+      })
+    $('#sortable1, #sortable2, #sortable3').droppable({
+        drop: handleDrop
+    })
   } );
