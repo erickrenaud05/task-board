@@ -3,8 +3,34 @@ let taskList = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 
 // Todo: create a function to generate a unique task id
-function generateTaskId() {
+function generateTaskId(task) {
+    // id will be based on status and position
+    // three unique ids for each section, then the order of the items 
+    if(!nextId) {
+        nextId = {
+            toDo: 0,
+            inProgress: 0,
+            done: 0
+        }
+    }
+    
+    if (task.state === 'todo') {
+        nextId.toDo++;
+        localStorage.setItem('nextId', JSON.stringify(nextId));
+        return nextId.toDo;
+    } else if (task.state === 'inProgress') {
+        nextId.inProgress++;
+        localStorage.setItem('nextId', JSON.stringify(nextId));
+        return nextId.inProgress;
+    } else if (task.state === 'done') {
+        nextId.done++;
+        localStorage.setItem('nextId', JSON.stringify(nextId));
+        return nextId.done;
+    }
 
+    //if the code gets to this point there is an unknown error
+    console.log('unknown error');
+    return 1
 }
 
 // Todo: create a function to create a task card
@@ -39,6 +65,13 @@ function createTaskCard(task) {
     newCardContentEl.append(newCardDescriptionEl, newCardDueDateEl, newCardDeleteButton);
     newCardEl.append(newCardHeaderEl, newCardContentEl);
     cardArea.append(newCardEl);
+
+    //add draggable feature
+    newCardEl.draggable({
+        opacity: '35%',
+        helper: 'clone',
+        revert: 'invalid'
+    });
 }
 
 // Todo: create a function to render the task list and make cards draggable
@@ -73,8 +106,12 @@ function handleAddTask(event){
         dueDate: taskDueDate.val(),
         description: taskDescription.val(),
         status: taskStatus,
-        state: 'todo'
+        state: 'todo',
+        //added during task id branch
     };
+
+    var newTaskId = generateTaskId(newTask);
+    newTask.Id = newTaskId;
     //create the card here for now to visualize changes
     createTaskCard(newTask);
     
