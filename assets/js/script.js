@@ -65,11 +65,12 @@ function createTaskCard(task) {
     cardArea.append(newCardHeaderEl, newCardContentEl);
 
     //add draggable feature
-    cardArea.draggable({
-        opacity: '35%',
-        helper: 'clone',
-        revert: 'invalid'
-    });
+    // cardArea.draggable({
+    //     opacity: '35%',
+    //     helper: 'clone',
+    //     revert: 'invalid',
+    //     zIndex: 100
+    // });
 
     return cardArea;
 }
@@ -78,13 +79,20 @@ function createTaskCard(task) {
 function renderTaskList() {
     // take the task list and use the createTaskCard in here to render based on state
     const todoAreaEl = $('#todo-cards').html('');
-    const todoListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const todoListEl = $('<ul>').css('list-style-type', 'none')
+        .addClass('connectedSortable card col-8 p-0 border-0 bg-light').attr('id', 'sortable1');
     const inProgressAreaEl = $('#in-progress-cards').html('');
-    const inProgressListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const inProgressListEl = $('<ul>').css('list-style-type', 'none').attr('id', 'sortable2')
+        .addClass('connectedSortable card col-8 p-0 border-0 bg-light ');
     const doneAreaEl = $('#done-cards').html('');
-    const doneListEl = $('<ul>').css('list-style-type', 'none').addClass('card col-8 p-0 border-0 bg-light');
+    const doneListEl = $('<ul>').css('list-style-type', 'none').attr('id', 'sortable3')
+        .addClass('connectedSortable card col-8 p-0 border-0 bg-light');
 
-    for (let task in taskList) {
+    todoAreaEl.addClass('h-100');
+    inProgressAreaEl.addClass('h-100');
+    doneAreaEl.addClass('h-100');
+        
+        for (let task in taskList) {
         if (taskList[task].state === 'todo') {
             todoListEl.append(createTaskCard(taskList[task]));
         } else if (taskList[task].state === 'inProgress') {
@@ -95,8 +103,8 @@ function renderTaskList() {
     }
 
     todoAreaEl.append(todoListEl);
-    inProgressAreaEl.append(inProgressAreaEl);
-    doneAreaEl.append(doneAreaEl);
+    inProgressAreaEl.append(inProgressListEl);
+    doneAreaEl.append(doneListEl);
     
 }
 // Todo: create a function to handle adding a new task
@@ -173,4 +181,8 @@ $(document).ready(function () {
 
 $( function() {
     $( "#datepicker" ).datepicker();
+    $( "#sortable1, #sortable2, #sortable3" ).sortable({
+        connectWith: ".connectedSortable",
+        dropOnEmpty: true
+      })
   } );
